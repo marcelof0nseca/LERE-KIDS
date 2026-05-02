@@ -6,9 +6,9 @@
 
 Site vitrine da LERE Kids, loja de brinquedos educacionais e socioeducacionais.
 
-A proposta da LERE Kids e apresentar brinquedos que ajudam no desenvolvimento infantil por meio da brincadeira, estimulando aprendizagem, criatividade, coordenacao motora, raciocinio, linguagem, musicalizacao, psicomotricidade e habilidades sociais.
+A proposta da LERE Kids é apresentar brinquedos que ajudam no desenvolvimento infantil por meio da brincadeira, estimulando aprendizagem, criatividade, coordenação motora, raciocínio, linguagem, musicalização, psicomotricidade e habilidades sociais.
 
-O site permite visualizar o catalogo da loja, pesquisar produtos, filtrar por categoria, ver detalhes dos brinquedos, montar um carrinho e enviar o pedido pelo WhatsApp com os dados do cliente.
+O site permite visualizar o catálogo da loja, pesquisar produtos, filtrar por categoria, ver detalhes dos brinquedos, montar um carrinho e enviar o pedido pelo WhatsApp com os dados do cliente.
 
 ## Contato
 
@@ -30,42 +30,52 @@ npm run build
 
 ## Funcionalidades
 
-- Catalogo de brinquedos com busca e filtros
+- Catálogo de brinquedos com busca e filtros
 - Carrinho local
-- Cadastro local do cliente com dados salvos no navegador
-- Checkout simples com nome, telefone, e-mail, CPF, endereco, CEP, tipo de entrega e observacoes
-- Calculo de subtotal e total quando os produtos possuem preco cadastrado
-- Suporte a produtos com valor `Consultar`, mantendo confirmacao pelo atendimento
+- Login e cadastro com Supabase Auth
+- Cadastro do cliente salvo no Supabase
+- Checkout simples com nome, telefone, e-mail, CPF, endereço, CEP, tipo de entrega e observações
+- Preenchimento automático de endereço pelo CEP
+- Cálculo de subtotal e total quando os produtos possuem preço cadastrado
+- Suporte a produtos com valor `Consultar`, mantendo confirmação pelo atendimento
 - Pedido finalizado pelo WhatsApp da loja
-- Links para Instagram, contato, politica de privacidade e politica de troca
+- Links para Instagram, contato, política de privacidade e política de troca
 
-## Backend Futuro
+## Backend
 
-Nesta fase, os dados da conta ficam apenas no navegador do cliente. Para virar ecommerce completo, o frontend continua na Vercel e o backend pode ser criado com:
+O frontend continua na Vercel e a primeira camada de backend usa Supabase:
 
-- Vercel Functions em `/api` para pedidos, checkout, pagamentos e webhooks
 - Supabase Auth para login real com e-mail e senha
-- Supabase Postgres para clientes, enderecos, produtos, pedidos e status
-- Variaveis de ambiente na Vercel para tokens secretos
-- Mercado Pago Checkout Pro integrado somente pelo backend
+- Supabase Postgres para dados de cliente
+- Schema inicial em `supabase/schema.sql`
+- Variáveis de ambiente na Vercel para tokens secretos
+- Vercel Functions em `/api` futuramente para pedidos, pagamentos e webhooks
+- Mercado Pago Checkout Pro futuramente integrado somente pelo backend
 
-## Publicacao
+Variáveis locais:
+
+```env
+VITE_SUPABASE_URL=sua_url_do_supabase
+VITE_SUPABASE_ANON_KEY=sua_chave_publica
+```
+
+## Publicação
 
 Hospedagem recomendada: Vercel.
 
-Configuracao:
+Configuração:
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- Dominio planejado: `lerekids.com.br`
-- SSL: gerado automaticamente pela Vercel apos a configuracao correta do DNS
+- Domínio planejado: `lerekids.com.br`
+- SSL: gerado automaticamente pela Vercel após a configuração correta do DNS
 
 Checklist:
 
 1. Registrar `lerekids.com.br` no Registro.br.
-2. Conectar o repositorio do GitHub na Vercel.
+2. Conectar o repositório do GitHub na Vercel.
 3. Fazer o primeiro deploy e testar a URL `vercel.app`.
 4. Adicionar `lerekids.com.br` e `www.lerekids.com.br` no projeto da Vercel.
 5. Configurar os DNS no Registro.br conforme indicado pela Vercel.
 6. Confirmar o cadeado HTTPS.
-7. Criar ou atualizar o Perfil da Empresa no Google com site, telefone, endereco, fotos e descricao da loja.
+7. Criar ou atualizar o Perfil da Empresa no Google com site, telefone, endereço, fotos e descrição da loja.

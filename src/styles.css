@@ -411,7 +411,9 @@ svg {
 .checkout-form input:focus,
 .checkout-form select:focus,
 .checkout-form textarea:focus,
+.auth-form input:focus,
 .account-form input:focus,
+.auth-tabs button:focus-visible,
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .social-button:focus-visible,
@@ -845,11 +847,12 @@ svg {
 
 .account-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.36fr);
+  grid-template-columns: minmax(260px, 0.36fr) minmax(0, 1fr) minmax(280px, 0.34fr);
   gap: 18px;
   align-items: start;
 }
 
+.auth-form,
 .account-form,
 .account-info {
   padding: 18px;
@@ -859,16 +862,19 @@ svg {
   box-shadow: 0 14px 34px rgba(91, 35, 98, 0.08);
 }
 
+.auth-form,
 .account-form {
   display: grid;
   gap: 12px;
 }
 
+.auth-form h3,
 .account-form h3 {
   margin: 0;
   color: var(--purple);
 }
 
+.auth-form label,
 .account-form label {
   display: grid;
   gap: 7px;
@@ -877,6 +883,7 @@ svg {
   font-weight: 850;
 }
 
+.auth-form input,
 .account-form input {
   width: 100%;
   min-height: 44px;
@@ -885,6 +892,54 @@ svg {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.auth-form p,
+.form-status {
+  margin: 0;
+  color: var(--slate);
+  line-height: 1.5;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border-radius: 12px;
+  background: var(--soft-pink);
+}
+
+.auth-tabs button {
+  min-height: 38px;
+  color: var(--purple);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.auth-tabs button.active,
+.auth-tabs button:hover,
+.auth-tabs button:focus-visible {
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(154, 31, 130, 0.12);
+}
+
+.auth-user {
+  overflow-wrap: anywhere;
+  color: var(--purple);
+  font-weight: 900;
+}
+
+.form-status {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--soft-teal);
+  color: #2b726b;
+  font-size: 0.88rem;
+  font-weight: 850;
 }
 
 .account-actions {

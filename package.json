@@ -9,10 +9,10 @@
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.1",
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
     "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {}
+    "react-dom": "latest",
+    "vite": "latest"
+  }
 }

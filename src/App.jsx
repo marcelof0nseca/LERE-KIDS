@@ -5,10 +5,11 @@ import {
   WHATSAPP_NUMBER,
   products,
 } from "./data/products.js";
+import { supabase } from "./lib/supabase.js";
 
 const allOption = "Todos";
 const tabs = [
-  { id: "inicio", label: "Inicio" },
+  { id: "inicio", label: "Início" },
   { id: "todos", label: "Loja" },
   { id: "carrinho", label: "Carrinho" },
   { id: "conta", label: "Conta" },
@@ -32,6 +33,12 @@ const initialCheckout = {
   notes: "",
 };
 
+const initialAuthForm = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
 function getStoredCustomerProfile() {
   if (typeof window === "undefined") {
     return null;
@@ -51,7 +58,7 @@ function getCheckoutFromProfile(profile) {
   }
 
   return {
-    name: profile.name || "",
+    name: profile.name || profile.full_name || "",
     phone: profile.phone || "",
     email: profile.email || "",
     cpf: profile.cpf || "",
@@ -61,6 +68,43 @@ function getCheckoutFromProfile(profile) {
     complement: profile.complement || "",
     neighborhood: profile.neighborhood || "",
   };
+}
+
+function getProfilePayload(profile, user) {
+  return {
+    id: user.id,
+    full_name: profile.name,
+    phone: profile.phone,
+    cpf: profile.cpf,
+    cep: profile.cep,
+    address: profile.address,
+    number: profile.number,
+    complement: profile.complement,
+    neighborhood: profile.neighborhood,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function getAuthErrorMessage(message) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("invalid login credentials")) {
+    return "E-mail ou senha incorretos.";
+  }
+
+  if (normalizedMessage.includes("user already registered")) {
+    return "Este e-mail já possui cadastro. Tente entrar.";
+  }
+
+  if (normalizedMessage.includes("password")) {
+    return "A senha precisa ter pelo menos 6 caracteres.";
+  }
+
+  if (normalizedMessage.includes("email")) {
+    return "Confira o e-mail informado.";
+  }
+
+  return message;
 }
 
 function normalizeCep(cep) {
@@ -87,13 +131,13 @@ async function fetchAddressByCep(cep) {
   const response = await fetch(`https://viacep.com.br/ws/${normalizedCep}/json/`);
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel consultar o CEP.");
+    throw new Error("Não foi possível consultar o CEP.");
   }
 
   const data = await response.json();
 
   if (data.erro) {
-    throw new Error("CEP nao encontrado.");
+    throw new Error("CEP não encontrado.");
   }
 
   return {
@@ -103,17 +147,17 @@ async function fetchAddressByCep(cep) {
 }
 
 const privacyHighlights = [
-  "A LERE Kids usa dados de contato e checkout apenas para responder pedidos, duvidas e atendimentos iniciados pelo cliente.",
-  "O cadastro desta versao fica salvo somente no navegador do cliente, sem senha e sem envio automatico para servidor.",
-  "Informacoes enviadas pelo WhatsApp ou Instagram seguem tambem as politicas dessas plataformas.",
-  "Quando houver login real e pagamento online no futuro, a politica devera ser revisada para incluir dados de conta, pagamento, pedido e entrega.",
+  "A LERE Kids coleta dados de conta, contato e checkout apenas para identificar o cliente, facilitar o atendimento, organizar pedidos e responder solicitações iniciadas pelo próprio cliente.",
+  "Nome, telefone, e-mail, CPF e endereço podem ser salvos no Supabase com acesso protegido por autenticação e políticas de segurança que limitam cada cliente aos próprios dados.",
+  "A LERE Kids não vende dados pessoais e não deve compartilhar informações do cliente fora do necessário para atendimento, entrega, obrigação legal ou operação da compra.",
+  "Informações enviadas pelo WhatsApp ou Instagram também seguem as políticas dessas plataformas. A política deverá ser revisada antes da entrada de pagamento online, frete integrado ou novas finalidades de uso.",
 ];
 
 const exchangeHighlights = [
-  "Solicitacoes de troca devem ser feitas pelo WhatsApp da loja, informando produto, data da compra e motivo.",
-  "Produtos devem estar sem sinais de uso indevido, com embalagem e itens originais sempre que aplicavel.",
-  "Itens com defeito serao analisados pela loja para orientar troca, substituicao ou outro encaminhamento adequado.",
-  "Prazos, disponibilidade de estoque e condicoes finais devem ser confirmados no atendimento da LERE Kids.",
+  "Solicitações de troca devem ser feitas pelo WhatsApp da loja, informando produto, data da compra e motivo.",
+  "Produtos devem estar sem sinais de uso indevido, com embalagem e itens originais sempre que aplicável.",
+  "Itens com defeito serão analisados pela loja para orientar troca, substituição ou outro encaminhamento adequado.",
+  "Prazos, disponibilidade de estoque e condições finais devem ser confirmados no atendimento da LERE Kids.",
 ];
 
 function getUniqueValues(key) {
@@ -127,9 +171,9 @@ function getUniqueSkills() {
 function getWhatsAppLink(product) {
   const message = product
     ? product.price === null
-      ? `Ola! Tenho interesse no produto: ${product.name}. Poderia me passar o valor, disponibilidade e formas de pagamento?`
-      : `Ola! Tenho interesse no produto: ${product.name}, no valor de ${product.formattedPrice}. Poderia me passar mais informacoes?`
-    : "Ola! Vim pelo site da LERE Kids e gostaria de conhecer os brinquedos disponiveis.";
+      ? `Olá! Tenho interesse no produto: ${product.name}. Poderia me passar o valor, disponibilidade e formas de pagamento?`
+      : `Olá! Tenho interesse no produto: ${product.name}, no valor de ${product.formattedPrice}. Poderia me passar mais informações?`
+    : "Olá! Vim pelo site da LERE Kids e gostaria de conhecer os brinquedos disponíveis.";
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -173,18 +217,18 @@ function getCartWhatsAppLink(cartItems, checkout) {
     checkout.email && `E-mail: ${checkout.email}`,
     checkout.cpf && `CPF: ${checkout.cpf}`,
     checkout.cep && `CEP: ${checkout.cep}`,
-    checkout.address && `Endereco: ${checkout.address}${checkout.number ? `, ${checkout.number}` : ""}`,
+    checkout.address && `Endereço: ${checkout.address}${checkout.number ? `, ${checkout.number}` : ""}`,
     checkout.complement && `Complemento: ${checkout.complement}`,
     checkout.neighborhood && `Bairro/Cidade: ${checkout.neighborhood}`,
     `Entrega: ${checkout.deliveryType}`,
-    checkout.notes && `Observacoes: ${checkout.notes}`,
+    checkout.notes && `Observações: ${checkout.notes}`,
   ]
     .filter(Boolean)
     .join("\n");
   const totalLine = summary.hasConsultPrice
     ? `Total parcial: ${summary.formattedTotal}. Existem itens com valor a confirmar.`
     : `Total: ${summary.formattedTotal}`;
-  const message = `Ola! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\n${totalLine}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade, entrega e formas de pagamento?`;
+  const message = `Olá! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\n${totalLine}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade, entrega e formas de pagamento?`;
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -340,7 +384,7 @@ function CartPage({
 
       {cartItems.length === 0 ? (
         <div className="empty-state">
-          <h3>Seu carrinho esta vazio</h3>
+          <h3>Seu carrinho está vazio</h3>
           <p>Escolha alguns produtos na loja para montar o pedido.</p>
           <button type="button" className="primary-button" onClick={onGoToStore}>
             Ver produtos
@@ -434,7 +478,7 @@ function CartPage({
             {cepStatus && <p className="cep-status">{cepStatus}</p>}
             <div className="checkout-row">
               <label>
-                Endereco
+                Endereço
                 <input
                   type="text"
                   value={checkout.address}
@@ -482,7 +526,7 @@ function CartPage({
               </select>
             </label>
             <label>
-              Observacoes
+              Observações
               <textarea
                 value={checkout.notes}
                 onChange={(event) => onUpdateCheckout("notes", event.target.value)}
@@ -510,9 +554,19 @@ function CartPage({
 }
 
 function AccountPage({
+  session,
+  authMode,
+  authForm,
   accountForm,
   customerProfile,
   cepStatus,
+  authStatus,
+  accountStatus,
+  isAuthLoading,
+  isProfileLoading,
+  onChangeAuthMode,
+  onUpdateAuth,
+  onSubmitAuth,
   onUpdateAccount,
   onSaveAccount,
   onUseInCheckout,
@@ -526,14 +580,87 @@ function AccountPage({
         <p className="eyebrow">Cadastro do cliente</p>
         <h2>Conta LERE Kids</h2>
         <p>
-          Salve seus dados neste navegador para preencher o checkout mais rapido
-          nas proximas compras.
+          Salve seus dados com segurança para preencher o checkout mais rápido
+          nas próximas compras.
         </p>
       </div>
 
       <div className="account-layout">
+        <form className="auth-form" onSubmit={onSubmitAuth}>
+          <h3>{session ? "Sessão ativa" : authMode === "login" ? "Entrar" : "Criar conta"}</h3>
+          {session ? (
+            <>
+              <p className="auth-user">{session.user.email}</p>
+              <p>
+                Seus dados podem ser salvos na conta e usados automaticamente no
+                checkout.
+              </p>
+              <button type="button" className="secondary-button" onClick={onLogout}>
+                Sair da conta
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="auth-tabs" aria-label="Escolha entre login e cadastro">
+                <button
+                  type="button"
+                  className={authMode === "login" ? "active" : ""}
+                  onClick={() => onChangeAuthMode("login")}
+                >
+                  Entrar
+                </button>
+                <button
+                  type="button"
+                  className={authMode === "signup" ? "active" : ""}
+                  onClick={() => onChangeAuthMode("signup")}
+                >
+                  Cadastrar
+                </button>
+              </div>
+              <label>
+                E-mail
+                <input
+                  type="email"
+                  value={authForm.email}
+                  onChange={(event) => onUpdateAuth("email", event.target.value)}
+                  placeholder="seuemail@exemplo.com"
+                  required
+                />
+              </label>
+              <label>
+                {authMode === "login" ? "Senha" : "Criar senha"}
+                <input
+                  type="password"
+                  value={authForm.password}
+                  onChange={(event) => onUpdateAuth("password", event.target.value)}
+                  placeholder="Minimo de 6 caracteres"
+                  minLength="6"
+                  required
+                />
+              </label>
+              {authMode === "signup" && (
+                <label>
+                  Confirmar senha
+                  <input
+                    type="password"
+                    value={authForm.confirmPassword}
+                    onChange={(event) => onUpdateAuth("confirmPassword", event.target.value)}
+                    placeholder="Repita a senha"
+                    minLength="6"
+                    required
+                  />
+                </label>
+              )}
+              <button type="submit" className="primary-button" disabled={isAuthLoading}>
+                {isAuthLoading ? "Aguarde..." : authMode === "login" ? "Entrar" : "Cadastrar"}
+              </button>
+            </>
+          )}
+          {authStatus && <p className="form-status">{authStatus}</p>}
+        </form>
+
         <form className="account-form">
-          <h3>{customerProfile ? "Dados salvos" : "Criar cadastro local"}</h3>
+          <h3>{customerProfile ? "Dados salvos" : "Dados do cliente"}</h3>
           <div className="checkout-row">
             <label>
               Nome
@@ -597,7 +724,7 @@ function AccountPage({
           {cepStatus && <p className="cep-status">{cepStatus}</p>}
           <div className="checkout-row">
             <label>
-              Endereco
+              Endereço
               <input
                 type="text"
                 value={accountForm.address}
@@ -632,17 +759,21 @@ function AccountPage({
               type="button"
               className="primary-button"
               onClick={onSaveAccount}
-              disabled={!hasMinimumData}
+              disabled={!hasMinimumData || !session || isProfileLoading}
             >
-              Salvar dados
+              {isProfileLoading ? "Salvando..." : "Salvar dados"}
             </button>
             <button type="button" className="secondary-button" onClick={onUseInCheckout}>
               Usar no checkout
             </button>
           </div>
+          {!session && (
+            <p className="form-hint">Entre ou crie uma conta para salvar os dados no Supabase.</p>
+          )}
+          {accountStatus && <p className="form-status">{accountStatus}</p>}
           {customerProfile && (
             <button type="button" className="link-button" onClick={onLogout}>
-              Remover cadastro deste navegador
+              Sair e limpar dados deste navegador
             </button>
           )}
         </form>
@@ -650,13 +781,13 @@ function AccountPage({
         <aside className="account-info">
           <strong>Como funciona agora</strong>
           <p>
-            Esta conta fica salva somente neste navegador. Ela nao usa senha e
-            ainda nao cria usuario no servidor.
+            Esta conta usa autenticação pelo Supabase. Seus dados são salvos no
+            banco com regras de segurança para que cada cliente acesse apenas o próprio cadastro.
           </p>
-          <strong>Como sera no backend</strong>
+          <strong>Como será no backend</strong>
           <p>
             Na etapa real, os dados ficam em banco seguro e o login usa e-mail e
-            senha por um provedor de autenticacao.
+            senha por um provedor de autenticação.
           </p>
         </aside>
       </div>
@@ -668,7 +799,7 @@ function LegalPage({ title, intro, items }) {
   return (
     <section className="legal-page page-section">
       <div>
-        <p className="eyebrow">Informacoes da loja</p>
+        <p className="eyebrow">Informações da loja</p>
         <h2>{title}</h2>
         <p>{intro}</p>
       </div>
@@ -680,9 +811,9 @@ function LegalPage({ title, intro, items }) {
         ))}
       </div>
       <p className="legal-note">
-        Este texto e uma base informativa para a vitrine da loja. Antes de operar
+        Este texto é uma base informativa para a vitrine da loja. Antes de operar
         pagamento online, entrega integrada ou cadastro de clientes, revise as
-        politicas com orientacao profissional.
+        políticas com orientação profissional.
       </p>
     </section>
   );
@@ -697,6 +828,13 @@ export default function App() {
   const [skill, setSkill] = useState(allOption);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [session, setSession] = useState(null);
+  const [authMode, setAuthMode] = useState("login");
+  const [authForm, setAuthForm] = useState(initialAuthForm);
+  const [authStatus, setAuthStatus] = useState("");
+  const [accountStatus, setAccountStatus] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [customerProfile, setCustomerProfile] = useState(() => getStoredCustomerProfile());
   const [accountForm, setAccountForm] = useState(() => ({
     ...initialCheckout,
@@ -721,6 +859,62 @@ export default function App() {
       window.localStorage.removeItem(customerProfileKey);
     }
   }, [customerProfile]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      setSession(currentSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user) {
+      return;
+    }
+
+    async function loadProfile() {
+      setIsProfileLoading(true);
+      setAccountStatus("Carregando dados da conta...");
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (error) {
+        setAccountStatus(`Não foi possível carregar o cadastro: ${error.message}`);
+        setIsProfileLoading(false);
+        return;
+      }
+
+      if (data) {
+        const profile = {
+          ...getCheckoutFromProfile(data),
+          email: session.user.email || "",
+        };
+
+        setCustomerProfile(profile);
+        setAccountForm((current) => ({ ...current, ...profile }));
+        setCheckout((current) => ({ ...current, ...profile }));
+        setAccountStatus("Dados carregados da sua conta.");
+      } else {
+        setAccountForm((current) => ({ ...current, email: session.user.email || current.email }));
+        setAccountStatus("Conta conectada. Preencha seus dados e salve.");
+      }
+
+      setIsProfileLoading(false);
+    }
+
+    loadProfile();
+  }, [session]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -821,6 +1015,61 @@ export default function App() {
     }
   }
 
+  function updateAuth(field, value) {
+    setAuthForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function changeAuthMode(mode) {
+    setAuthMode(mode);
+    setAuthStatus("");
+    setAuthForm(initialAuthForm);
+  }
+
+  async function submitAuth(event) {
+    event.preventDefault();
+    setIsAuthLoading(true);
+    setAuthStatus(authMode === "login" ? "Entrando..." : "Criando conta...");
+
+    if (authForm.password.length < 6) {
+      setAuthStatus("A senha precisa ter pelo menos 6 caracteres.");
+      setIsAuthLoading(false);
+      return;
+    }
+
+    if (authMode === "signup" && authForm.password !== authForm.confirmPassword) {
+      setAuthStatus("As senhas não conferem.");
+      setIsAuthLoading(false);
+      return;
+    }
+
+    const authRequest =
+      authMode === "login"
+        ? supabase.auth.signInWithPassword({
+            email: authForm.email,
+            password: authForm.password,
+          })
+        : supabase.auth.signUp({
+            email: authForm.email,
+            password: authForm.password,
+          });
+
+    const { error } = await authRequest;
+
+    if (error) {
+      setAuthStatus(getAuthErrorMessage(error.message));
+      setIsAuthLoading(false);
+      return;
+    }
+
+    setAuthStatus(
+      authMode === "login"
+        ? "Login feito com sucesso."
+        : "Conta criada. Se o Supabase pedir confirmação, confira seu e-mail.",
+    );
+    setAuthForm(initialAuthForm);
+    setIsAuthLoading(false);
+  }
+
   async function lookupCep(cep, setForm, setStatus) {
     const normalizedCep = normalizeCep(cep);
 
@@ -829,7 +1078,7 @@ export default function App() {
       return;
     }
 
-    setStatus("Buscando endereco...");
+    setStatus("Buscando endereço...");
 
     try {
       const addressData = await fetchAddressByCep(normalizedCep);
@@ -844,9 +1093,9 @@ export default function App() {
         address: addressData.address || current.address,
         neighborhood: addressData.neighborhood || current.neighborhood,
       }));
-      setStatus("Endereco preenchido pelo CEP.");
+      setStatus("Endereço preenchido pelo CEP.");
     } catch {
-      setStatus("Nao encontramos esse CEP. Preencha o endereco manualmente.");
+      setStatus("Não encontramos esse CEP. Preencha o endereço manualmente.");
     }
   }
 
@@ -854,6 +1103,27 @@ export default function App() {
     const profile = getCheckoutFromProfile(accountForm);
     setCustomerProfile(profile);
     setCheckout((current) => ({ ...current, ...profile }));
+
+    if (!session?.user) {
+      setAccountStatus("Entre ou crie uma conta para salvar no Supabase.");
+      return;
+    }
+
+    setIsProfileLoading(true);
+    setAccountStatus("Salvando cadastro...");
+
+    supabase
+      .from("profiles")
+      .upsert(getProfilePayload(profile, session.user))
+      .then(({ error }) => {
+        if (error) {
+          setAccountStatus(`Não foi possível salvar: ${error.message}`);
+        } else {
+          setAccountStatus("Cadastro salvo na sua conta.");
+        }
+
+        setIsProfileLoading(false);
+      });
   }
 
   function useAccountInCheckout() {
@@ -862,9 +1132,13 @@ export default function App() {
     openTab("carrinho");
   }
 
-  function logoutAccount() {
+  async function logoutAccount() {
+    await supabase.auth.signOut();
     setCustomerProfile(null);
     setAccountForm(initialCheckout);
+    setCheckout(initialCheckout);
+    setAuthStatus("Você saiu da conta.");
+    setAccountStatus("");
   }
 
   return (
@@ -884,7 +1158,7 @@ export default function App() {
           <span />
           <span />
         </button>
-        <nav className={isMenuOpen ? "open" : ""} aria-label="Navegacao principal">
+        <nav className={isMenuOpen ? "open" : ""} aria-label="Navegação principal">
           {tabs.map((tab) => (
             <button
               type="button"
@@ -917,10 +1191,10 @@ export default function App() {
           <>
             <section className="hero">
               <div className="hero-copy">
-                <span className="eyebrow">Brinquedos educativos com proposito</span>
-                <h1>Aprender brincando, escolher com confianca.</h1>
+                <span className="eyebrow">Brinquedos educativos com propósito</span>
+                <h1>Aprender brincando, escolher com confiança.</h1>
                 <p>
-                  Uma vitrine de brinquedos socioeducacionais para familias,
+                  Uma vitrine de brinquedos educacionais e socioeducacionais para famílias,
                   escolas e profissionais que valorizam desenvolvimento, afeto
                   e criatividade.
                 </p>
@@ -943,7 +1217,7 @@ export default function App() {
                   <span className="brand-orange" />
                 </div>
                 <p>
-                  Catalogo importado com produtos reais da LERE Kids. Os valores
+                  Catálogo importado com produtos reais da LERE Kids. Os valores
                   podem ser consultados direto pelo WhatsApp da loja.
                 </p>
               </div>
@@ -956,7 +1230,7 @@ export default function App() {
                   <h2 id="home-products-title">Alguns produtos da vitrine</h2>
                 </div>
                 <button type="button" className="secondary-button" onClick={() => openTab("todos")}>
-                  Abrir catalogo completo
+                  Abrir catálogo completo
                 </button>
               </div>
               <div className="product-grid featured-grid">
@@ -978,7 +1252,7 @@ export default function App() {
           <section className="shop-section" aria-labelledby="products-title">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Catalogo completo</p>
+                <p className="eyebrow">Catálogo completo</p>
                 <h2 id="products-title">Loja LERE Kids</h2>
               </div>
               <p>
@@ -1065,9 +1339,19 @@ export default function App() {
 
         {activeTab === "conta" && (
           <AccountPage
+            session={session}
+            authMode={authMode}
+            authForm={authForm}
             accountForm={accountForm}
             customerProfile={customerProfile}
             cepStatus={accountCepStatus}
+            authStatus={authStatus}
+            accountStatus={accountStatus}
+            isAuthLoading={isAuthLoading}
+            isProfileLoading={isProfileLoading}
+            onChangeAuthMode={changeAuthMode}
+            onUpdateAuth={updateAuth}
+            onSubmitAuth={submitAuth}
             onUpdateAccount={updateAccount}
             onSaveAccount={saveAccount}
             onUseInCheckout={useAccountInCheckout}
@@ -1079,20 +1363,20 @@ export default function App() {
           <section className="about-section page-section">
             <div>
               <p className="eyebrow">Sobre a loja</p>
-              <h2>LERE Kids aproxima brincadeira, educacao e desenvolvimento.</h2>
+              <h2>LERE Kids aproxima brincadeira, educação e desenvolvimento.</h2>
             </div>
             <div className="about-grid">
               <article>
                 <strong>Escolha orientada</strong>
-                <p>Cards mostram idade, habilidade e contexto de uso para facilitar a decisao.</p>
+                <p>Cards mostram idade, habilidade e contexto de uso para facilitar a decisão.</p>
               </article>
               <article>
                 <strong>Compra conversada</strong>
-                <p>O pedido comeca no WhatsApp, com a mensagem do produto ja preenchida.</p>
+                <p>O pedido começa no WhatsApp, com a mensagem do produto já preenchida.</p>
               </article>
               <article>
-                <strong>Catalogo flexivel</strong>
-                <p>Os produtos ficam no frontend, simples de editar quando o catalogo real chegar.</p>
+                <strong>Catálogo flexível</strong>
+                <p>Os produtos ficam no frontend, simples de editar quando o catálogo real chegar.</p>
               </article>
             </div>
           </section>
@@ -1123,16 +1407,16 @@ export default function App() {
 
         {activeTab === "privacidade" && (
           <LegalPage
-            title="Politica de Privacidade"
-            intro="A LERE Kids respeita a privacidade dos clientes e busca coletar somente as informacoes necessarias para atendimento e comunicacao."
+            title="Política de Privacidade"
+            intro="A LERE Kids respeita a privacidade dos clientes e busca coletar somente as informações necessárias para atendimento, cadastro e comunicação."
             items={privacyHighlights}
           />
         )}
 
         {activeTab === "troca" && (
           <LegalPage
-            title="Politica de Troca"
-            intro="A politica de troca organiza o atendimento de solicitacoes relacionadas a produtos comprados com a LERE Kids."
+            title="Política de Troca"
+            intro="A política de troca organiza o atendimento de solicitações relacionadas a produtos comprados com a LERE Kids."
             items={exchangeHighlights}
           />
         )}
@@ -1143,10 +1427,10 @@ export default function App() {
         <p>LERE Kids - brinquedos socioeducacionais para aprender brincando.</p>
         <div className="footer-links" aria-label="Links institucionais">
           <button type="button" onClick={() => openTab("privacidade")}>
-            Politica de Privacidade
+            Política de Privacidade
           </button>
           <button type="button" onClick={() => openTab("troca")}>
-            Politica de Troca
+            Política de Troca
           </button>
           <button type="button" onClick={() => openTab("contato")}>
             Contato
