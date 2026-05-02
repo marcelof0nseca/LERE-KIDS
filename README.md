@@ -8,7 +8,7 @@ Site vitrine da LERE Kids, loja de brinquedos educacionais e socioeducacionais.
 
 A proposta da LERE Kids e apresentar brinquedos que ajudam no desenvolvimento infantil por meio da brincadeira, estimulando aprendizagem, criatividade, coordenacao motora, raciocinio, linguagem, musicalizacao, psicomotricidade e habilidades sociais.
 
-O site permite visualizar o catalogo da loja, pesquisar produtos, filtrar por categoria, ver detalhes dos brinquedos e iniciar o atendimento pelo WhatsApp com uma mensagem pronta sobre o produto desejado.
+O site permite visualizar o catalogo da loja, pesquisar produtos, filtrar por categoria, ver detalhes dos brinquedos, montar um carrinho e enviar o pedido pelo WhatsApp com os dados do cliente.
 
 ## Contato
 
@@ -27,6 +27,14 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## Funcionalidades
+
+- Catalogo de brinquedos com busca e filtros
+- Carrinho local sem login
+- Checkout simples com nome, telefone, bairro/cidade, tipo de entrega e observacoes
+- Pedido finalizado pelo WhatsApp da loja
+- Links para Instagram, contato, politica de privacidade e politica de troca
 
 ## Publicacao
 

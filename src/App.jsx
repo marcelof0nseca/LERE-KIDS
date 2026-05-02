@@ -10,9 +10,18 @@ const allOption = "Todos";
 const tabs = [
   { id: "inicio", label: "Inicio" },
   { id: "todos", label: "Loja" },
+  { id: "carrinho", label: "Carrinho" },
   { id: "sobre", label: "Sobre" },
   { id: "contato", label: "Contato" },
 ];
+
+const initialCheckout = {
+  name: "",
+  phone: "",
+  neighborhood: "",
+  deliveryType: "Retirada na loja",
+  notes: "",
+};
 
 const privacyHighlights = [
   "A LERE Kids usa dados de contato apenas para responder pedidos, duvidas e atendimentos iniciados pelo cliente.",
@@ -46,6 +55,27 @@ function getWhatsAppLink(product) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
+function getCartWhatsAppLink(cartItems, checkout) {
+  const productLines = cartItems
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.quantity}x ${item.product.name} (${item.product.formattedPrice})`,
+    )
+    .join("\n");
+  const customerLines = [
+    checkout.name && `Nome: ${checkout.name}`,
+    checkout.phone && `Telefone: ${checkout.phone}`,
+    checkout.neighborhood && `Bairro/Cidade: ${checkout.neighborhood}`,
+    `Entrega: ${checkout.deliveryType}`,
+    checkout.notes && `Observacoes: ${checkout.notes}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const message = `Ola! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade e formas de pagamento?`;
+
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
 function InstagramIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -65,7 +95,7 @@ function WhatsAppIcon() {
   );
 }
 
-function ProductCard({ product, onDetails, compact = false }) {
+function ProductCard({ product, onDetails, onAddToCart, compact = false }) {
   return (
     <article className={`product-card ${compact ? "compact-card" : ""}`}>
       <div className="product-image-wrap">
@@ -92,19 +122,22 @@ function ProductCard({ product, onDetails, compact = false }) {
           </button>
         </div>
         <a
-          className="primary-button product-buy-button"
+          className="secondary-button product-buy-button"
           href={getWhatsAppLink(product)}
           target="_blank"
           rel="noreferrer"
         >
           WhatsApp
         </a>
+        <button type="button" className="primary-button product-buy-button" onClick={() => onAddToCart(product)}>
+          Adicionar
+        </button>
       </div>
     </article>
   );
 }
 
-function ProductModal({ product, onClose }) {
+function ProductModal({ product, onClose, onAddToCart }) {
   if (!product) {
     return null;
   }
@@ -144,16 +177,152 @@ function ProductModal({ product, onClose }) {
             </div>
           </dl>
           <a
-            className="primary-button full-button"
+            className="secondary-button full-button"
             href={getWhatsAppLink(product)}
             target="_blank"
             rel="noreferrer"
           >
             Comprar pelo WhatsApp
           </a>
+          <button type="button" className="primary-button full-button" onClick={() => onAddToCart(product)}>
+            Adicionar ao carrinho
+          </button>
         </div>
       </section>
     </div>
+  );
+}
+
+function CartPage({
+  cartItems,
+  checkout,
+  onUpdateCheckout,
+  onIncrement,
+  onDecrement,
+  onRemove,
+  onClear,
+  onGoToStore,
+}) {
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const canSendOrder = cartItems.length > 0 && checkout.name.trim() && checkout.phone.trim();
+
+  return (
+    <section className="cart-page page-section">
+      <div className="cart-heading">
+        <div>
+          <p className="eyebrow">Pedido pelo WhatsApp</p>
+          <h2>Carrinho</h2>
+          <p>
+            Separe os brinquedos desejados e envie tudo para a LERE Kids em uma
+            mensagem organizada.
+          </p>
+        </div>
+        <strong>{totalItems} item(ns)</strong>
+      </div>
+
+      {cartItems.length === 0 ? (
+        <div className="empty-state">
+          <h3>Seu carrinho esta vazio</h3>
+          <p>Escolha alguns produtos na loja para montar o pedido.</p>
+          <button type="button" className="primary-button" onClick={onGoToStore}>
+            Ver produtos
+          </button>
+        </div>
+      ) : (
+        <div className="cart-layout">
+          <div className="cart-items">
+            {cartItems.map((item) => (
+              <article className="cart-item" key={item.product.id}>
+                <img src={item.product.image} alt={item.product.name} />
+                <div>
+                  <p>{item.product.category}</p>
+                  <h3>{item.product.name}</h3>
+                  <strong>{item.product.formattedPrice}</strong>
+                </div>
+                <div className="quantity-control" aria-label={`Quantidade de ${item.product.name}`}>
+                  <button type="button" onClick={() => onDecrement(item.product.id)}>
+                    -
+                  </button>
+                  <span>{item.quantity}</span>
+                  <button type="button" onClick={() => onIncrement(item.product.id)}>
+                    +
+                  </button>
+                </div>
+                <button type="button" className="remove-button" onClick={() => onRemove(item.product.id)}>
+                  Remover
+                </button>
+              </article>
+            ))}
+            <button type="button" className="link-button" onClick={onClear}>
+              Limpar carrinho
+            </button>
+          </div>
+
+          <form className="checkout-form">
+            <h3>Dados para atendimento</h3>
+            <label>
+              Nome
+              <input
+                type="text"
+                value={checkout.name}
+                onChange={(event) => onUpdateCheckout("name", event.target.value)}
+                placeholder="Seu nome"
+              />
+            </label>
+            <label>
+              Telefone
+              <input
+                type="tel"
+                value={checkout.phone}
+                onChange={(event) => onUpdateCheckout("phone", event.target.value)}
+                placeholder="(81) 99999-9999"
+              />
+            </label>
+            <label>
+              Bairro/Cidade
+              <input
+                type="text"
+                value={checkout.neighborhood}
+                onChange={(event) => onUpdateCheckout("neighborhood", event.target.value)}
+                placeholder="Ex.: Recife - Boa Viagem"
+              />
+            </label>
+            <label>
+              Entrega
+              <select
+                value={checkout.deliveryType}
+                onChange={(event) => onUpdateCheckout("deliveryType", event.target.value)}
+              >
+                <option>Retirada na loja</option>
+                <option>Consultar entrega</option>
+                <option>Entrega local</option>
+              </select>
+            </label>
+            <label>
+              Observacoes
+              <textarea
+                value={checkout.notes}
+                onChange={(event) => onUpdateCheckout("notes", event.target.value)}
+                placeholder="Ex.: quero saber disponibilidade para presente"
+                rows="4"
+              />
+            </label>
+            {!canSendOrder && (
+              <p className="form-hint">Informe pelo menos nome e telefone para enviar o pedido.</p>
+            )}
+            <a
+              className={`primary-button full-button ${!canSendOrder ? "disabled-link" : ""}`}
+              href={canSendOrder ? getCartWhatsAppLink(cartItems, checkout) : undefined}
+              target="_blank"
+              rel="noreferrer"
+              aria-disabled={!canSendOrder}
+            >
+              Enviar pedido no WhatsApp
+            </a>
+          </form>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -189,6 +358,8 @@ export default function App() {
   const [ageRange, setAgeRange] = useState(allOption);
   const [skill, setSkill] = useState(allOption);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [checkout, setCheckout] = useState(initialCheckout);
 
   const categories = useMemo(() => getUniqueValues("category"), []);
   const ageRanges = useMemo(() => getUniqueValues("ageRange"), []);
@@ -229,6 +400,53 @@ export default function App() {
     setSkill(allOption);
   }
 
+  function addToCart(product) {
+    setCartItems((items) => {
+      const existingItem = items.find((item) => item.product.id === product.id);
+
+      if (existingItem) {
+        return items.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        );
+      }
+
+      return [...items, { product, quantity: 1 }];
+    });
+    setSelectedProduct(null);
+    setActiveTab("carrinho");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function incrementCartItem(productId) {
+    setCartItems((items) =>
+      items.map((item) =>
+        item.product.id === productId ? { ...item, quantity: item.quantity + 1 } : item,
+      ),
+    );
+  }
+
+  function decrementCartItem(productId) {
+    setCartItems((items) =>
+      items
+        .map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
+            : item,
+        )
+        .filter((item) => item.quantity > 0),
+    );
+  }
+
+  function removeCartItem(productId) {
+    setCartItems((items) => items.filter((item) => item.product.id !== productId));
+  }
+
+  function updateCheckout(field, value) {
+    setCheckout((current) => ({ ...current, [field]: value }));
+  }
+
   return (
     <>
       <header className="site-header">
@@ -258,6 +476,9 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <button type="button" className="cart-shortcut" onClick={() => openTab("carrinho")}>
+          Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
+        </button>
         <a
           className="secondary-button header-whatsapp"
           href={getWhatsAppLink()}
@@ -321,6 +542,7 @@ export default function App() {
                     key={product.id}
                     product={product}
                     onDetails={setSelectedProduct}
+                    onAddToCart={addToCart}
                     compact
                   />
                 ))}
@@ -388,6 +610,7 @@ export default function App() {
                     key={product.id}
                     product={product}
                     onDetails={setSelectedProduct}
+                    onAddToCart={addToCart}
                   />
                 ))}
               </div>
@@ -401,6 +624,19 @@ export default function App() {
               </div>
             )}
           </section>
+        )}
+
+        {activeTab === "carrinho" && (
+          <CartPage
+            cartItems={cartItems}
+            checkout={checkout}
+            onUpdateCheckout={updateCheckout}
+            onIncrement={incrementCartItem}
+            onDecrement={decrementCartItem}
+            onRemove={removeCartItem}
+            onClear={() => setCartItems([])}
+            onGoToStore={() => openTab("todos")}
+          />
         )}
 
         {activeTab === "sobre" && (
@@ -490,7 +726,11 @@ export default function App() {
         </div>
       </footer>
 
-      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      <ProductModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={addToCart}
+      />
     </>
   );
 }
