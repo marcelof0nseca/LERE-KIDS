@@ -5,7 +5,7 @@ import {
   WHATSAPP_NUMBER,
   products,
 } from "./data/products.js";
-import { supabase } from "./lib/supabase.js";
+import { isSupabaseConfigured, supabase } from "./lib/supabase.js";
 
 const allOption = "Todos";
 const tabs = [
@@ -861,6 +861,11 @@ export default function App() {
   }, [customerProfile]);
 
   useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setAuthStatus("Supabase não configurado neste ambiente. Confira as variáveis na Vercel.");
+      return undefined;
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
     });
@@ -875,7 +880,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!session?.user) {
+    if (!isSupabaseConfigured || !supabase || !session?.user) {
       return;
     }
 
@@ -1027,6 +1032,12 @@ export default function App() {
 
   async function submitAuth(event) {
     event.preventDefault();
+
+    if (!isSupabaseConfigured || !supabase) {
+      setAuthStatus("Supabase não configurado neste ambiente. Confira as variáveis na Vercel.");
+      return;
+    }
+
     setIsAuthLoading(true);
     setAuthStatus(authMode === "login" ? "Entrando..." : "Criando conta...");
 
@@ -1104,7 +1115,7 @@ export default function App() {
     setCustomerProfile(profile);
     setCheckout((current) => ({ ...current, ...profile }));
 
-    if (!session?.user) {
+    if (!isSupabaseConfigured || !supabase || !session?.user) {
       setAccountStatus("Entre ou crie uma conta para salvar no Supabase.");
       return;
     }
@@ -1133,7 +1144,10 @@ export default function App() {
   }
 
   async function logoutAccount() {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+
     setCustomerProfile(null);
     setAccountForm(initialCheckout);
     setCheckout(initialCheckout);
