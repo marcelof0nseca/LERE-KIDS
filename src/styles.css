@@ -76,7 +76,7 @@ svg {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 12px;
   align-items: center;
   padding: 12px clamp(18px, 4vw, 56px);
@@ -91,18 +91,6 @@ svg {
   color: #ffffff;
   background: var(--green);
   border: 0;
-  border-radius: 999px;
-  font-weight: 900;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.account-shortcut {
-  min-height: 40px;
-  padding: 9px 13px;
-  color: var(--purple);
-  background: var(--soft-pink);
-  border: 1px solid #ffd2eb;
   border-radius: 999px;
   font-weight: 900;
   cursor: pointer;
@@ -418,7 +406,6 @@ svg {
 .secondary-button:focus-visible,
 .social-button:focus-visible,
 .cart-shortcut:focus-visible,
-.account-shortcut:focus-visible,
 .link-button:focus-visible,
 .mini-product:focus-visible,
 .modal-close:focus-visible,
@@ -1158,7 +1145,7 @@ svg {
 
 @media (max-width: 980px) {
   .site-header {
-    grid-template-columns: auto 1fr auto auto auto;
+    grid-template-columns: auto 1fr auto auto;
   }
 
   .site-header nav {
@@ -1224,8 +1211,7 @@ svg {
     display: none;
   }
 
-  .cart-shortcut,
-  .account-shortcut {
+  .cart-shortcut {
     grid-column: 1 / -1;
     width: 100%;
   }

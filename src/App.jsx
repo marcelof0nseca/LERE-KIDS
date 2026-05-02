@@ -148,7 +148,7 @@ async function fetchAddressByCep(cep) {
 
 const privacyHighlights = [
   "A LERE Kids coleta dados de conta, contato e checkout apenas para identificar o cliente, facilitar o atendimento, organizar pedidos e responder solicitações iniciadas pelo próprio cliente.",
-  "Nome, telefone, e-mail, CPF e endereço podem ser salvos no Supabase com acesso protegido por autenticação e políticas de segurança que limitam cada cliente aos próprios dados.",
+  "Nome, telefone, e-mail, CPF e endereço podem ser salvos em uma conta protegida, com acesso limitado ao próprio cliente.",
   "A LERE Kids não vende dados pessoais e não deve compartilhar informações do cliente fora do necessário para atendimento, entrega, obrigação legal ou operação da compra.",
   "Informações enviadas pelo WhatsApp ou Instagram também seguem as políticas dessas plataformas. A política deverá ser revisada antes da entrada de pagamento online, frete integrado ou novas finalidades de uso.",
 ];
@@ -768,7 +768,7 @@ function AccountPage({
             </button>
           </div>
           {!session && (
-            <p className="form-hint">Entre ou crie uma conta para salvar os dados no Supabase.</p>
+            <p className="form-hint">Entre ou crie uma conta para salvar seus dados com segurança.</p>
           )}
           {accountStatus && <p className="form-status">{accountStatus}</p>}
           {customerProfile && (
@@ -781,13 +781,13 @@ function AccountPage({
         <aside className="account-info">
           <strong>Como funciona agora</strong>
           <p>
-            Esta conta usa autenticação pelo Supabase. Seus dados são salvos no
-            banco com regras de segurança para que cada cliente acesse apenas o próprio cadastro.
+            Sua conta guarda os dados necessários para agilizar o atendimento e
+            preencher o pedido com mais praticidade.
           </p>
-          <strong>Como será no backend</strong>
+          <strong>Segurança dos dados</strong>
           <p>
-            Na etapa real, os dados ficam em banco seguro e o login usa e-mail e
-            senha por um provedor de autenticação.
+            O acesso é feito por e-mail e senha. Cada cliente visualiza apenas
+            as próprias informações de cadastro.
           </p>
         </aside>
       </div>
@@ -862,7 +862,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
-      setAuthStatus("Supabase não configurado neste ambiente. Confira as variáveis na Vercel.");
+      setAuthStatus("Cadastro temporariamente indisponível. Tente novamente em alguns instantes.");
       return undefined;
     }
 
@@ -1034,7 +1034,7 @@ export default function App() {
     event.preventDefault();
 
     if (!isSupabaseConfigured || !supabase) {
-      setAuthStatus("Supabase não configurado neste ambiente. Confira as variáveis na Vercel.");
+      setAuthStatus("Cadastro temporariamente indisponível. Tente novamente em alguns instantes.");
       return;
     }
 
@@ -1075,7 +1075,7 @@ export default function App() {
     setAuthStatus(
       authMode === "login"
         ? "Login feito com sucesso."
-        : "Conta criada. Se o Supabase pedir confirmação, confira seu e-mail.",
+        : "Conta criada. Se for necessário confirmar, confira seu e-mail.",
     );
     setAuthForm(initialAuthForm);
     setIsAuthLoading(false);
@@ -1116,7 +1116,7 @@ export default function App() {
     setCheckout((current) => ({ ...current, ...profile }));
 
     if (!isSupabaseConfigured || !supabase || !session?.user) {
-      setAccountStatus("Entre ou crie uma conta para salvar no Supabase.");
+      setAccountStatus("Entre ou crie uma conta para salvar seus dados.");
       return;
     }
 
@@ -1180,15 +1180,12 @@ export default function App() {
               className={activeTab === tab.id ? "active" : ""}
               onClick={() => openTab(tab.id)}
             >
-              {tab.label}
+              {tab.id === "conta" && customerProfile ? "Conta salva" : tab.label}
             </button>
           ))}
         </nav>
         <button type="button" className="cart-shortcut" onClick={() => openTab("carrinho")}>
           Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
-        </button>
-        <button type="button" className="account-shortcut" onClick={() => openTab("conta")}>
-          {customerProfile ? "Conta salva" : "Entrar"}
         </button>
         <a
           className="secondary-button header-whatsapp"
@@ -1390,7 +1387,7 @@ export default function App() {
               </article>
               <article>
                 <strong>Catálogo flexível</strong>
-                <p>Os produtos ficam no frontend, simples de editar quando o catálogo real chegar.</p>
+                <p>O catálogo é organizado para facilitar novas atualizações da loja.</p>
               </article>
             </div>
           </section>
