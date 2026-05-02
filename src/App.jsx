@@ -9,9 +9,23 @@ import {
 const allOption = "Todos";
 const tabs = [
   { id: "inicio", label: "Inicio" },
-  { id: "todos", label: "Todos os produtos" },
+  { id: "todos", label: "Loja" },
   { id: "sobre", label: "Sobre" },
   { id: "contato", label: "Contato" },
+];
+
+const privacyHighlights = [
+  "A LERE Kids usa dados de contato apenas para responder pedidos, duvidas e atendimentos iniciados pelo cliente.",
+  "O site nao possui checkout, login ou cadastro de cliente nesta versao; a conversa de compra acontece pelo WhatsApp.",
+  "Informacoes enviadas pelo WhatsApp ou Instagram seguem tambem as politicas dessas plataformas.",
+  "Quando houver pagamento online no futuro, a politica devera ser revisada para incluir dados de pagamento, pedido e entrega.",
+];
+
+const exchangeHighlights = [
+  "Solicitacoes de troca devem ser feitas pelo WhatsApp da loja, informando produto, data da compra e motivo.",
+  "Produtos devem estar sem sinais de uso indevido, com embalagem e itens originais sempre que aplicavel.",
+  "Itens com defeito serao analisados pela loja para orientar troca, substituicao ou outro encaminhamento adequado.",
+  "Prazos, disponibilidade de estoque e condicoes finais devem ser confirmados no atendimento da LERE Kids.",
 ];
 
 function getUniqueValues(key) {
@@ -140,6 +154,30 @@ function ProductModal({ product, onClose }) {
         </div>
       </section>
     </div>
+  );
+}
+
+function LegalPage({ title, intro, items }) {
+  return (
+    <section className="legal-page page-section">
+      <div>
+        <p className="eyebrow">Informacoes da loja</p>
+        <h2>{title}</h2>
+        <p>{intro}</p>
+      </div>
+      <div className="legal-list">
+        {items.map((item) => (
+          <article key={item}>
+            <p>{item}</p>
+          </article>
+        ))}
+      </div>
+      <p className="legal-note">
+        Este texto e uma base informativa para a vitrine da loja. Antes de operar
+        pagamento online, entrega integrada ou cadastro de clientes, revise as
+        politicas com orientacao profissional.
+      </p>
+    </section>
   );
 }
 
@@ -296,7 +334,7 @@ export default function App() {
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Catalogo completo</p>
-                <h2 id="products-title">Todos os brinquedos</h2>
+                <h2 id="products-title">Loja LERE Kids</h2>
               </div>
               <p>
                 Use a busca e os filtros para encontrar por nome, idade,
@@ -410,11 +448,38 @@ export default function App() {
             </div>
           </section>
         )}
+
+        {activeTab === "privacidade" && (
+          <LegalPage
+            title="Politica de Privacidade"
+            intro="A LERE Kids respeita a privacidade dos clientes e busca coletar somente as informacoes necessarias para atendimento e comunicacao."
+            items={privacyHighlights}
+          />
+        )}
+
+        {activeTab === "troca" && (
+          <LegalPage
+            title="Politica de Troca"
+            intro="A politica de troca organiza o atendimento de solicitacoes relacionadas a produtos comprados com a LERE Kids."
+            items={exchangeHighlights}
+          />
+        )}
       </main>
 
       <footer className="site-footer">
         <img src={logo} alt="LERE Brinquedos Educativos" />
         <p>LERE Kids - brinquedos socioeducacionais para aprender brincando.</p>
+        <div className="footer-links" aria-label="Links institucionais">
+          <button type="button" onClick={() => openTab("privacidade")}>
+            Politica de Privacidade
+          </button>
+          <button type="button" onClick={() => openTab("troca")}>
+            Politica de Troca
+          </button>
+          <button type="button" onClick={() => openTab("contato")}>
+            Contato
+          </button>
+        </div>
         <div className="footer-socials" aria-label="Redes sociais">
           <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram da LERE Kids">
             <InstagramIcon />
