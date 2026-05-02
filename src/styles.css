@@ -631,12 +631,24 @@ svg {
   line-height: 1.55;
 }
 
-.cart-heading strong {
+.cart-heading-summary {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.cart-heading-summary strong,
+.cart-heading-summary span {
   padding: 10px 14px;
   color: var(--purple);
   background: var(--soft-pink);
   border-radius: 999px;
   white-space: nowrap;
+}
+
+.cart-heading-summary span {
+  color: #ffffff;
+  background: var(--purple);
 }
 
 .cart-layout {
@@ -731,6 +743,23 @@ svg {
   color: var(--purple);
 }
 
+.checkout-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  color: var(--purple);
+  background: var(--soft-pink);
+  font-weight: 900;
+}
+
+.checkout-total span {
+  color: var(--slate);
+  font-size: 0.84rem;
+}
+
 .checkout-form label {
   display: grid;
   gap: 7px;
@@ -750,6 +779,12 @@ svg {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.checkout-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 10px;
 }
 
 .form-hint {
@@ -1112,6 +1147,14 @@ svg {
   .cart-heading {
     display: grid;
     align-items: start;
+  }
+
+  .cart-heading-summary {
+    justify-items: start;
+  }
+
+  .checkout-row {
+    grid-template-columns: 1fr;
   }
 
   .cart-item {

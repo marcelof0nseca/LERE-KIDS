@@ -18,6 +18,12 @@ const tabs = [
 const initialCheckout = {
   name: "",
   phone: "",
+  email: "",
+  cpf: "",
+  cep: "",
+  address: "",
+  number: "",
+  complement: "",
   neighborhood: "",
   deliveryType: "Retirada na loja",
   notes: "",
@@ -55,23 +61,57 @@ function getWhatsAppLink(product) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
+function formatCurrency(value) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+function getItemSubtotal(item) {
+  return typeof item.product.price === "number" ? item.product.price * item.quantity : null;
+}
+
+function getCartSummary(cartItems) {
+  const pricedItems = cartItems.filter((item) => typeof item.product.price === "number");
+  const total = pricedItems.reduce((sum, item) => sum + getItemSubtotal(item), 0);
+  const hasConsultPrice = pricedItems.length !== cartItems.length;
+
+  return {
+    total,
+    hasConsultPrice,
+    formattedTotal: pricedItems.length > 0 ? formatCurrency(total) : "A confirmar",
+  };
+}
+
 function getCartWhatsAppLink(cartItems, checkout) {
+  const summary = getCartSummary(cartItems);
   const productLines = cartItems
-    .map(
-      (item, index) =>
-        `${index + 1}. ${item.quantity}x ${item.product.name} (${item.product.formattedPrice})`,
-    )
+    .map((item, index) => {
+      const subtotal = getItemSubtotal(item);
+      const subtotalText = subtotal === null ? "subtotal a confirmar" : `subtotal ${formatCurrency(subtotal)}`;
+
+      return `${index + 1}. ${item.quantity}x ${item.product.name} - ${item.product.formattedPrice} (${subtotalText})`;
+    })
     .join("\n");
   const customerLines = [
     checkout.name && `Nome: ${checkout.name}`,
     checkout.phone && `Telefone: ${checkout.phone}`,
+    checkout.email && `E-mail: ${checkout.email}`,
+    checkout.cpf && `CPF: ${checkout.cpf}`,
+    checkout.cep && `CEP: ${checkout.cep}`,
+    checkout.address && `Endereco: ${checkout.address}${checkout.number ? `, ${checkout.number}` : ""}`,
+    checkout.complement && `Complemento: ${checkout.complement}`,
     checkout.neighborhood && `Bairro/Cidade: ${checkout.neighborhood}`,
     `Entrega: ${checkout.deliveryType}`,
     checkout.notes && `Observacoes: ${checkout.notes}`,
   ]
     .filter(Boolean)
     .join("\n");
-  const message = `Ola! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade e formas de pagamento?`;
+  const totalLine = summary.hasConsultPrice
+    ? `Total parcial: ${summary.formattedTotal}. Existem itens com valor a confirmar.`
+    : `Total: ${summary.formattedTotal}`;
+  const message = `Ola! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\n${totalLine}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade, entrega e formas de pagamento?`;
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -204,6 +244,7 @@ function CartPage({
   onGoToStore,
 }) {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const summary = getCartSummary(cartItems);
   const canSendOrder = cartItems.length > 0 && checkout.name.trim() && checkout.phone.trim();
 
   return (
@@ -217,7 +258,10 @@ function CartPage({
             mensagem organizada.
           </p>
         </div>
-        <strong>{totalItems} item(ns)</strong>
+        <div className="cart-heading-summary">
+          <strong>{totalItems} item(ns)</strong>
+          <span>{summary.hasConsultPrice ? "Total a confirmar" : summary.formattedTotal}</span>
+        </div>
       </div>
 
       {cartItems.length === 0 ? (
@@ -237,7 +281,11 @@ function CartPage({
                 <div>
                   <p>{item.product.category}</p>
                   <h3>{item.product.name}</h3>
-                  <strong>{item.product.formattedPrice}</strong>
+                  <strong>
+                    {getItemSubtotal(item) === null
+                      ? item.product.formattedPrice
+                      : formatCurrency(getItemSubtotal(item))}
+                  </strong>
                 </div>
                 <div className="quantity-control" aria-label={`Quantidade de ${item.product.name}`}>
                   <button type="button" onClick={() => onDecrement(item.product.id)}>
@@ -260,6 +308,10 @@ function CartPage({
 
           <form className="checkout-form">
             <h3>Dados para atendimento</h3>
+            <div className="checkout-total">
+              <span>Resumo</span>
+              <strong>{summary.hasConsultPrice ? "Valores a confirmar" : summary.formattedTotal}</strong>
+            </div>
             <label>
               Nome
               <input
@@ -276,6 +328,62 @@ function CartPage({
                 value={checkout.phone}
                 onChange={(event) => onUpdateCheckout("phone", event.target.value)}
                 placeholder="(81) 99999-9999"
+              />
+            </label>
+            <label>
+              E-mail
+              <input
+                type="email"
+                value={checkout.email}
+                onChange={(event) => onUpdateCheckout("email", event.target.value)}
+                placeholder="seuemail@exemplo.com"
+              />
+            </label>
+            <label>
+              CPF
+              <input
+                type="text"
+                value={checkout.cpf}
+                onChange={(event) => onUpdateCheckout("cpf", event.target.value)}
+                placeholder="Opcional nesta fase"
+              />
+            </label>
+            <label>
+              CEP
+              <input
+                type="text"
+                value={checkout.cep}
+                onChange={(event) => onUpdateCheckout("cep", event.target.value)}
+                placeholder="00000-000"
+              />
+            </label>
+            <div className="checkout-row">
+              <label>
+                Endereco
+                <input
+                  type="text"
+                  value={checkout.address}
+                  onChange={(event) => onUpdateCheckout("address", event.target.value)}
+                  placeholder="Rua, avenida ou referencia"
+                />
+              </label>
+              <label>
+                Numero
+                <input
+                  type="text"
+                  value={checkout.number}
+                  onChange={(event) => onUpdateCheckout("number", event.target.value)}
+                  placeholder="123"
+                />
+              </label>
+            </div>
+            <label>
+              Complemento
+              <input
+                type="text"
+                value={checkout.complement}
+                onChange={(event) => onUpdateCheckout("complement", event.target.value)}
+                placeholder="Apartamento, bloco, ponto de referencia"
               />
             </label>
             <label>

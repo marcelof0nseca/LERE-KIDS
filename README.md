@@ -32,7 +32,9 @@ npm run build
 
 - Catalogo de brinquedos com busca e filtros
 - Carrinho local sem login
-- Checkout simples com nome, telefone, bairro/cidade, tipo de entrega e observacoes
+- Checkout simples com nome, telefone, e-mail, CPF, endereco, CEP, tipo de entrega e observacoes
+- Calculo de subtotal e total quando os produtos possuem preco cadastrado
+- Suporte a produtos com valor `Consultar`, mantendo confirmacao pelo atendimento
 - Pedido finalizado pelo WhatsApp da loja
 - Links para Instagram, contato, politica de privacidade e politica de troca
 
