@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/assets/logo-lere.png" alt="LERE Brinquedos Educativos" width="220" />
+</p>
+
 # LERE Kids
 
 Site vitrine da LERE Kids, loja de brinquedos educacionais e socioeducacionais.
