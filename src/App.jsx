@@ -147,9 +147,9 @@ async function fetchAddressByCep(cep) {
 }
 
 const privacyHighlights = [
-  "A LERE Kids coleta dados de conta, contato e checkout apenas para identificar o cliente, facilitar o atendimento, organizar pedidos e responder solicitações iniciadas pelo próprio cliente.",
+  "A LERÊ Kids coleta dados de conta, contato e checkout apenas para identificar o cliente, facilitar o atendimento, organizar pedidos e responder solicitações iniciadas pelo próprio cliente.",
   "Nome, telefone, e-mail, CPF e endereço podem ser salvos em uma conta protegida, com acesso limitado ao próprio cliente.",
-  "A LERE Kids não vende dados pessoais e não deve compartilhar informações do cliente fora do necessário para atendimento, entrega, obrigação legal ou operação da compra.",
+  "A LERÊ Kids não vende dados pessoais e não deve compartilhar informações do cliente fora do necessário para atendimento, entrega, obrigação legal ou operação da compra.",
   "Informações enviadas pelo WhatsApp ou Instagram também seguem as políticas dessas plataformas. A política deverá ser revisada antes da entrada de pagamento online, frete integrado ou novas finalidades de uso.",
 ];
 
@@ -157,7 +157,7 @@ const exchangeHighlights = [
   "Solicitações de troca devem ser feitas pelo WhatsApp da loja, informando produto, data da compra e motivo.",
   "Produtos devem estar sem sinais de uso indevido, com embalagem e itens originais sempre que aplicável.",
   "Itens com defeito serão analisados pela loja para orientar troca, substituição ou outro encaminhamento adequado.",
-  "Prazos, disponibilidade de estoque e condições finais devem ser confirmados no atendimento da LERE Kids.",
+  "Prazos, disponibilidade de estoque e condições finais devem ser confirmados no atendimento da LERÊ Kids.",
 ];
 
 function getUniqueValues(key) {
@@ -173,7 +173,7 @@ function getWhatsAppLink(product) {
     ? product.price === null
       ? `Olá! Tenho interesse no produto: ${product.name}. Poderia me passar o valor, disponibilidade e formas de pagamento?`
       : `Olá! Tenho interesse no produto: ${product.name}, no valor de ${product.formattedPrice}. Poderia me passar mais informações?`
-    : "Olá! Vim pelo site da LERE Kids e gostaria de conhecer os brinquedos disponíveis.";
+    : "Olá! Vim pelo site da LERÊ Kids e gostaria de conhecer os brinquedos disponíveis.";
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -228,7 +228,7 @@ function getCartWhatsAppLink(cartItems, checkout) {
   const totalLine = summary.hasConsultPrice
     ? `Total parcial: ${summary.formattedTotal}. Existem itens com valor a confirmar.`
     : `Total: ${summary.formattedTotal}`;
-  const message = `Olá! Quero fazer um pedido pela loja LERE Kids.\n\nProdutos:\n${productLines}\n\n${totalLine}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade, entrega e formas de pagamento?`;
+  const message = `Olá! Quero fazer um pedido pela loja LERÊ Kids.\n\nProdutos:\n${productLines}\n\n${totalLine}\n\nDados do cliente:\n${customerLines}\n\nPode confirmar valores, disponibilidade, entrega e formas de pagamento?`;
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -372,7 +372,7 @@ function CartPage({
           <p className="eyebrow">Pedido pelo WhatsApp</p>
           <h2>Carrinho</h2>
           <p>
-            Separe os brinquedos desejados e envie tudo para a LERE Kids em uma
+            Separe os brinquedos desejados e envie tudo para a LERÊ Kids em uma
             mensagem organizada.
           </p>
         </div>
@@ -578,7 +578,7 @@ function AccountPage({
     <section className="account-page page-section">
       <div className="account-heading">
         <p className="eyebrow">Cadastro do cliente</p>
-        <h2>Conta LERE Kids</h2>
+        <h2>Conta LERÊ Kids</h2>
         <p>
           Salve seus dados com segurança para preencher o checkout mais rápido
           nas próximas compras.
@@ -1159,7 +1159,7 @@ export default function App() {
     <>
       <header className="site-header">
         <button type="button" className="brand" onClick={() => openTab("inicio")}>
-          <img src={logo} alt="LERE Brinquedos Educativos" />
+          <img src={logo} alt="LERÊ Brinquedos Educativos" />
         </button>
         <button
           type="button"
@@ -1228,7 +1228,7 @@ export default function App() {
                   <span className="brand-orange" />
                 </div>
                 <p>
-                  Catálogo importado com produtos reais da LERE Kids. Os valores
+                  Catálogo importado com produtos reais da LERÊ Kids. Os valores
                   podem ser consultados direto pelo WhatsApp da loja.
                 </p>
               </div>
@@ -1264,7 +1264,7 @@ export default function App() {
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Catálogo completo</p>
-                <h2 id="products-title">Loja LERE Kids</h2>
+                <h2 id="products-title">Loja LERÊ Kids</h2>
               </div>
               <p>
                 Use a busca e os filtros para encontrar por nome, idade,
@@ -1374,7 +1374,7 @@ export default function App() {
           <section className="about-section page-section">
             <div>
               <p className="eyebrow">Sobre a loja</p>
-              <h2>LERE Kids aproxima brincadeira, educação e desenvolvimento.</h2>
+              <h2>LERÊ Kids aproxima brincadeira, educação e desenvolvimento.</h2>
             </div>
             <div className="about-grid">
               <article>
@@ -1399,7 +1399,7 @@ export default function App() {
               <p className="eyebrow">Contato</p>
               <h2>Gostou de algum brinquedo?</h2>
               <p>
-                Chame a LERE Kids no WhatsApp para confirmar disponibilidade,
+                Chame a LERÊ Kids no WhatsApp para confirmar disponibilidade,
                 entrega e formas de pagamento.
               </p>
             </div>
@@ -1419,7 +1419,7 @@ export default function App() {
         {activeTab === "privacidade" && (
           <LegalPage
             title="Política de Privacidade"
-            intro="A LERE Kids respeita a privacidade dos clientes e busca coletar somente as informações necessárias para atendimento, cadastro e comunicação."
+            intro="A LERÊ Kids respeita a privacidade dos clientes e busca coletar somente as informações necessárias para atendimento, cadastro e comunicação."
             items={privacyHighlights}
           />
         )}
@@ -1427,15 +1427,15 @@ export default function App() {
         {activeTab === "troca" && (
           <LegalPage
             title="Política de Troca"
-            intro="A política de troca organiza o atendimento de solicitações relacionadas a produtos comprados com a LERE Kids."
+            intro="A política de troca organiza o atendimento de solicitações relacionadas a produtos comprados com a LERÊ Kids."
             items={exchangeHighlights}
           />
         )}
       </main>
 
       <footer className="site-footer">
-        <img src={logo} alt="LERE Brinquedos Educativos" />
-        <p>LERE Kids - brinquedos socioeducacionais para aprender brincando.</p>
+        <img src={logo} alt="LERÊ Brinquedos Educativos" />
+        <p>LERÊ Kids - brinquedos socioeducacionais para aprender brincando.</p>
         <div className="footer-links" aria-label="Links institucionais">
           <button type="button" onClick={() => openTab("privacidade")}>
             Política de Privacidade
@@ -1448,10 +1448,10 @@ export default function App() {
           </button>
         </div>
         <div className="footer-socials" aria-label="Redes sociais">
-          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram da LERE Kids">
+          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram da LERÊ Kids">
             <InstagramIcon />
           </a>
-          <a href={getWhatsAppLink()} target="_blank" rel="noreferrer" aria-label="WhatsApp da LERE Kids">
+          <a href={getWhatsAppLink()} target="_blank" rel="noreferrer" aria-label="WhatsApp da LERÊ Kids">
             <WhatsAppIcon />
           </a>
         </div>

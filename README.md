@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="src/assets/logo-lere.png" alt="LERE Brinquedos Educativos" width="220" />
+  <img src="src/assets/logo-lere.png" alt="LERÊ Brinquedos Educativos" width="220" />
 </p>
 
-# LERE Kids
+# LERÊ Kids
 
-Site vitrine da LERE Kids, loja de brinquedos educacionais e socioeducacionais.
+Site vitrine da LERÊ Kids, loja de brinquedos educacionais e socioeducacionais.
 
-A proposta da LERE Kids é apresentar brinquedos que ajudam no desenvolvimento infantil por meio da brincadeira, estimulando aprendizagem, criatividade, coordenação motora, raciocínio, linguagem, musicalização, psicomotricidade e habilidades sociais.
+A proposta da LERÊ Kids é apresentar brinquedos que ajudam no desenvolvimento infantil por meio da brincadeira, estimulando aprendizagem, criatividade, coordenação motora, raciocínio, linguagem, musicalização, psicomotricidade e habilidades sociais.
 
 O site permite visualizar o catálogo da loja, pesquisar produtos, filtrar por categoria, ver detalhes dos brinquedos, montar um carrinho e enviar o pedido pelo WhatsApp com os dados do cliente.
 
