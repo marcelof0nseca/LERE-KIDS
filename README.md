@@ -1,1 +1,1 @@
-# LER--KIDS
+# LERE-KIDS
