@@ -818,6 +818,13 @@ svg {
   font-weight: 800;
 }
 
+.cep-status {
+  margin: -4px 0 2px;
+  color: var(--teal);
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
 .account-heading {
   margin-bottom: 22px;
 }

@@ -309,6 +309,7 @@ function ProductModal({ product, onClose, onAddToCart }) {
 function CartPage({
   cartItems,
   checkout,
+  cepStatus,
   onUpdateCheckout,
   onIncrement,
   onDecrement,
@@ -430,6 +431,7 @@ function CartPage({
                 placeholder="00000-000"
               />
             </label>
+            {cepStatus && <p className="cep-status">{cepStatus}</p>}
             <div className="checkout-row">
               <label>
                 Endereco
@@ -510,6 +512,7 @@ function CartPage({
 function AccountPage({
   accountForm,
   customerProfile,
+  cepStatus,
   onUpdateAccount,
   onSaveAccount,
   onUseInCheckout,
@@ -591,6 +594,7 @@ function AccountPage({
               />
             </label>
           </div>
+          {cepStatus && <p className="cep-status">{cepStatus}</p>}
           <div className="checkout-row">
             <label>
               Endereco
@@ -1049,6 +1053,7 @@ export default function App() {
           <CartPage
             cartItems={cartItems}
             checkout={checkout}
+            cepStatus={checkoutCepStatus}
             onUpdateCheckout={updateCheckout}
             onIncrement={incrementCartItem}
             onDecrement={decrementCartItem}
@@ -1062,6 +1067,7 @@ export default function App() {
           <AccountPage
             accountForm={accountForm}
             customerProfile={customerProfile}
+            cepStatus={accountCepStatus}
             onUpdateAccount={updateAccount}
             onSaveAccount={saveAccount}
             onUseInCheckout={useAccountInCheckout}
