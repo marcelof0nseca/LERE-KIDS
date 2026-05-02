@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import logo from "./assets/logo-lere.jpeg";
+import logo from "./assets/logo-lere.png";
 import {
   INSTAGRAM_URL,
   WHATSAPP_NUMBER,
@@ -62,11 +62,11 @@ function ProductCard({ product, onDetails, compact = false }) {
         <div>
           <p className="product-age">{product.ageRange}</p>
           <h3>{product.name}</h3>
-          <p className="product-description">{product.description}</p>
+          {compact && <p className="product-description">{product.description}</p>}
         </div>
-        {!compact && (
+        {compact && (
           <div className="skill-list" aria-label="Habilidades desenvolvidas">
-            {product.skills.map((skill) => (
+            {product.skills.slice(0, 2).map((skill) => (
               <span key={skill}>{skill}</span>
             ))}
           </div>
@@ -78,12 +78,12 @@ function ProductCard({ product, onDetails, compact = false }) {
           </button>
         </div>
         <a
-          className="primary-button full-button"
+          className="primary-button product-buy-button"
           href={getWhatsAppLink(product)}
           target="_blank"
           rel="noreferrer"
         >
-          Comprar pelo WhatsApp
+          WhatsApp
         </a>
       </div>
     </article>

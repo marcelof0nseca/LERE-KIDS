@@ -388,12 +388,13 @@ svg {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .featured-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .product-card {
@@ -412,28 +413,32 @@ svg {
 
 .product-image {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 0.72;
   object-fit: contain;
-  padding: 6px;
+  padding: 4px;
   background: #ffffff;
 }
 
 .product-category {
   position: absolute;
-  left: 12px;
-  top: 12px;
-  padding: 7px 10px;
+  left: 8px;
+  top: 8px;
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  padding: 5px 8px;
   border-radius: 999px;
   color: var(--purple);
   background: rgba(255, 255, 255, 0.9);
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .product-content {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 10px;
+  padding: 12px;
 }
 
 .compact-card .product-description {
@@ -446,14 +451,18 @@ svg {
 .product-age {
   margin: 0 0 6px;
   color: var(--green);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 950;
 }
 
 .product-content h3 {
-  min-height: 54px;
+  display: -webkit-box;
+  min-height: 40px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   margin: 0;
-  font-size: 1.28rem;
+  font-size: 1rem;
   line-height: 1.15;
 }
 
@@ -480,7 +489,7 @@ svg {
 
 .product-actions {
   display: flex;
-  min-height: 44px;
+  min-height: 34px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -489,15 +498,22 @@ svg {
 .product-actions strong,
 .modal-price {
   color: var(--purple);
-  font-size: 1.3rem;
+  font-size: 1.05rem;
 }
 
 .link-button {
-  min-height: 38px;
+  min-height: 32px;
   padding: 8px 0;
   color: var(--pink);
   background: transparent;
+  font-size: 0.84rem;
   font-weight: 950;
+}
+
+.product-buy-button {
+  min-height: 38px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
 }
 
 .empty-state {
@@ -741,7 +757,7 @@ svg {
 
   .product-grid,
   .featured-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .contact-actions {
@@ -812,10 +828,13 @@ svg {
   }
 
   .filters,
-  .product-grid,
-  .featured-grid,
   .modal {
     grid-template-columns: 1fr;
+  }
+
+  .product-grid,
+  .featured-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero-panel,
@@ -829,12 +848,11 @@ svg {
   }
 
   .product-content h3 {
-    min-height: 0;
+    min-height: 38px;
   }
 
   .product-actions {
-    display: grid;
-    justify-items: start;
+    align-items: center;
   }
 
   .modal-image {
