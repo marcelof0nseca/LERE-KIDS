@@ -5,3 +5,4 @@ dist/
 vite-dev.log
 vite-dev.err.log
 PRD.md
+DESIGN.md
