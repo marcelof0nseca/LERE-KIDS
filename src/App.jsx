@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import logo from "./assets/logo-lere.png";
 import {
   INSTAGRAM_URL,
@@ -11,9 +11,12 @@ const tabs = [
   { id: "inicio", label: "Inicio" },
   { id: "todos", label: "Loja" },
   { id: "carrinho", label: "Carrinho" },
+  { id: "conta", label: "Conta" },
   { id: "sobre", label: "Sobre" },
   { id: "contato", label: "Contato" },
 ];
+
+const customerProfileKey = "lereKidsCustomerProfile";
 
 const initialCheckout = {
   name: "",
@@ -29,11 +32,81 @@ const initialCheckout = {
   notes: "",
 };
 
+function getStoredCustomerProfile() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const storedProfile = window.localStorage.getItem(customerProfileKey);
+    return storedProfile ? JSON.parse(storedProfile) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getCheckoutFromProfile(profile) {
+  if (!profile) {
+    return {};
+  }
+
+  return {
+    name: profile.name || "",
+    phone: profile.phone || "",
+    email: profile.email || "",
+    cpf: profile.cpf || "",
+    cep: profile.cep || "",
+    address: profile.address || "",
+    number: profile.number || "",
+    complement: profile.complement || "",
+    neighborhood: profile.neighborhood || "",
+  };
+}
+
+function normalizeCep(cep) {
+  return cep.replace(/\D/g, "").slice(0, 8);
+}
+
+function formatCep(cep) {
+  const normalizedCep = normalizeCep(cep);
+
+  if (normalizedCep.length <= 5) {
+    return normalizedCep;
+  }
+
+  return `${normalizedCep.slice(0, 5)}-${normalizedCep.slice(5)}`;
+}
+
+async function fetchAddressByCep(cep) {
+  const normalizedCep = normalizeCep(cep);
+
+  if (normalizedCep.length !== 8) {
+    return null;
+  }
+
+  const response = await fetch(`https://viacep.com.br/ws/${normalizedCep}/json/`);
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel consultar o CEP.");
+  }
+
+  const data = await response.json();
+
+  if (data.erro) {
+    throw new Error("CEP nao encontrado.");
+  }
+
+  return {
+    address: data.logradouro || "",
+    neighborhood: [data.bairro, data.localidade, data.uf].filter(Boolean).join(" - "),
+  };
+}
+
 const privacyHighlights = [
-  "A LERE Kids usa dados de contato apenas para responder pedidos, duvidas e atendimentos iniciados pelo cliente.",
-  "O site nao possui checkout, login ou cadastro de cliente nesta versao; a conversa de compra acontece pelo WhatsApp.",
+  "A LERE Kids usa dados de contato e checkout apenas para responder pedidos, duvidas e atendimentos iniciados pelo cliente.",
+  "O cadastro desta versao fica salvo somente no navegador do cliente, sem senha e sem envio automatico para servidor.",
   "Informacoes enviadas pelo WhatsApp ou Instagram seguem tambem as politicas dessas plataformas.",
-  "Quando houver pagamento online no futuro, a politica devera ser revisada para incluir dados de pagamento, pedido e entrega.",
+  "Quando houver login real e pagamento online no futuro, a politica devera ser revisada para incluir dados de conta, pagamento, pedido e entrega.",
 ];
 
 const exchangeHighlights = [
@@ -434,6 +507,159 @@ function CartPage({
   );
 }
 
+function AccountPage({
+  accountForm,
+  customerProfile,
+  onUpdateAccount,
+  onSaveAccount,
+  onUseInCheckout,
+  onLogout,
+}) {
+  const hasMinimumData = accountForm.name.trim() && accountForm.phone.trim();
+
+  return (
+    <section className="account-page page-section">
+      <div className="account-heading">
+        <p className="eyebrow">Cadastro do cliente</p>
+        <h2>Conta LERE Kids</h2>
+        <p>
+          Salve seus dados neste navegador para preencher o checkout mais rapido
+          nas proximas compras.
+        </p>
+      </div>
+
+      <div className="account-layout">
+        <form className="account-form">
+          <h3>{customerProfile ? "Dados salvos" : "Criar cadastro local"}</h3>
+          <div className="checkout-row">
+            <label>
+              Nome
+              <input
+                type="text"
+                value={accountForm.name}
+                onChange={(event) => onUpdateAccount("name", event.target.value)}
+                placeholder="Seu nome"
+              />
+            </label>
+            <label>
+              Telefone
+              <input
+                type="tel"
+                value={accountForm.phone}
+                onChange={(event) => onUpdateAccount("phone", event.target.value)}
+                placeholder="(81) 99999-9999"
+              />
+            </label>
+          </div>
+          <div className="checkout-row">
+            <label>
+              E-mail
+              <input
+                type="email"
+                value={accountForm.email}
+                onChange={(event) => onUpdateAccount("email", event.target.value)}
+                placeholder="seuemail@exemplo.com"
+              />
+            </label>
+            <label>
+              CPF
+              <input
+                type="text"
+                value={accountForm.cpf}
+                onChange={(event) => onUpdateAccount("cpf", event.target.value)}
+                placeholder="Opcional"
+              />
+            </label>
+          </div>
+          <div className="checkout-row">
+            <label>
+              CEP
+              <input
+                type="text"
+                value={accountForm.cep}
+                onChange={(event) => onUpdateAccount("cep", event.target.value)}
+                placeholder="00000-000"
+              />
+            </label>
+            <label>
+              Bairro/Cidade
+              <input
+                type="text"
+                value={accountForm.neighborhood}
+                onChange={(event) => onUpdateAccount("neighborhood", event.target.value)}
+                placeholder="Recife - Boa Viagem"
+              />
+            </label>
+          </div>
+          <div className="checkout-row">
+            <label>
+              Endereco
+              <input
+                type="text"
+                value={accountForm.address}
+                onChange={(event) => onUpdateAccount("address", event.target.value)}
+                placeholder="Rua, avenida ou referencia"
+              />
+            </label>
+            <label>
+              Numero
+              <input
+                type="text"
+                value={accountForm.number}
+                onChange={(event) => onUpdateAccount("number", event.target.value)}
+                placeholder="123"
+              />
+            </label>
+          </div>
+          <label>
+            Complemento
+            <input
+              type="text"
+              value={accountForm.complement}
+              onChange={(event) => onUpdateAccount("complement", event.target.value)}
+              placeholder="Apartamento, bloco, ponto de referencia"
+            />
+          </label>
+          {!hasMinimumData && (
+            <p className="form-hint">Informe pelo menos nome e telefone para salvar.</p>
+          )}
+          <div className="account-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={onSaveAccount}
+              disabled={!hasMinimumData}
+            >
+              Salvar dados
+            </button>
+            <button type="button" className="secondary-button" onClick={onUseInCheckout}>
+              Usar no checkout
+            </button>
+          </div>
+          {customerProfile && (
+            <button type="button" className="link-button" onClick={onLogout}>
+              Remover cadastro deste navegador
+            </button>
+          )}
+        </form>
+
+        <aside className="account-info">
+          <strong>Como funciona agora</strong>
+          <p>
+            Esta conta fica salva somente neste navegador. Ela nao usa senha e
+            ainda nao cria usuario no servidor.
+          </p>
+          <strong>Como sera no backend</strong>
+          <p>
+            Na etapa real, os dados ficam em banco seguro e o login usa e-mail e
+            senha por um provedor de autenticacao.
+          </p>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 function LegalPage({ title, intro, items }) {
   return (
     <section className="legal-page page-section">
@@ -467,12 +693,30 @@ export default function App() {
   const [skill, setSkill] = useState(allOption);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cartItems, setCartItems] = useState([]);
-  const [checkout, setCheckout] = useState(initialCheckout);
+  const [customerProfile, setCustomerProfile] = useState(() => getStoredCustomerProfile());
+  const [accountForm, setAccountForm] = useState(() => ({
+    ...initialCheckout,
+    ...getCheckoutFromProfile(getStoredCustomerProfile()),
+  }));
+  const [checkout, setCheckout] = useState(() => ({
+    ...initialCheckout,
+    ...getCheckoutFromProfile(getStoredCustomerProfile()),
+  }));
+  const [checkoutCepStatus, setCheckoutCepStatus] = useState("");
+  const [accountCepStatus, setAccountCepStatus] = useState("");
 
   const categories = useMemo(() => getUniqueValues("category"), []);
   const ageRanges = useMemo(() => getUniqueValues("ageRange"), []);
   const skills = useMemo(() => getUniqueSkills(), []);
   const featuredProducts = products.filter((product) => product.featured);
+
+  useEffect(() => {
+    if (customerProfile) {
+      window.localStorage.setItem(customerProfileKey, JSON.stringify(customerProfile));
+    } else {
+      window.localStorage.removeItem(customerProfileKey);
+    }
+  }, [customerProfile]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -552,7 +796,71 @@ export default function App() {
   }
 
   function updateCheckout(field, value) {
-    setCheckout((current) => ({ ...current, [field]: value }));
+    setCheckout((current) => ({
+      ...current,
+      [field]: field === "cep" ? formatCep(value) : value,
+    }));
+
+    if (field === "cep") {
+      lookupCep(value, setCheckout, setCheckoutCepStatus);
+    }
+  }
+
+  function updateAccount(field, value) {
+    setAccountForm((current) => ({
+      ...current,
+      [field]: field === "cep" ? formatCep(value) : value,
+    }));
+
+    if (field === "cep") {
+      lookupCep(value, setAccountForm, setAccountCepStatus);
+    }
+  }
+
+  async function lookupCep(cep, setForm, setStatus) {
+    const normalizedCep = normalizeCep(cep);
+
+    if (normalizedCep.length < 8) {
+      setStatus("");
+      return;
+    }
+
+    setStatus("Buscando endereco...");
+
+    try {
+      const addressData = await fetchAddressByCep(normalizedCep);
+
+      if (!addressData) {
+        setStatus("");
+        return;
+      }
+
+      setForm((current) => ({
+        ...current,
+        address: addressData.address || current.address,
+        neighborhood: addressData.neighborhood || current.neighborhood,
+      }));
+      setStatus("Endereco preenchido pelo CEP.");
+    } catch {
+      setStatus("Nao encontramos esse CEP. Preencha o endereco manualmente.");
+    }
+  }
+
+  function saveAccount() {
+    const profile = getCheckoutFromProfile(accountForm);
+    setCustomerProfile(profile);
+    setCheckout((current) => ({ ...current, ...profile }));
+  }
+
+  function useAccountInCheckout() {
+    const profile = getCheckoutFromProfile(accountForm);
+    setCheckout((current) => ({ ...current, ...profile }));
+    openTab("carrinho");
+  }
+
+  function logoutAccount() {
+    setCustomerProfile(null);
+    setAccountForm(initialCheckout);
   }
 
   return (
@@ -586,6 +894,9 @@ export default function App() {
         </nav>
         <button type="button" className="cart-shortcut" onClick={() => openTab("carrinho")}>
           Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
+        </button>
+        <button type="button" className="account-shortcut" onClick={() => openTab("conta")}>
+          {customerProfile ? "Conta salva" : "Entrar"}
         </button>
         <a
           className="secondary-button header-whatsapp"
@@ -744,6 +1055,17 @@ export default function App() {
             onRemove={removeCartItem}
             onClear={() => setCartItems([])}
             onGoToStore={() => openTab("todos")}
+          />
+        )}
+
+        {activeTab === "conta" && (
+          <AccountPage
+            accountForm={accountForm}
+            customerProfile={customerProfile}
+            onUpdateAccount={updateAccount}
+            onSaveAccount={saveAccount}
+            onUseInCheckout={useAccountInCheckout}
+            onLogout={logoutAccount}
           />
         )}
 

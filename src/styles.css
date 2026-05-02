@@ -76,7 +76,7 @@ svg {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto auto;
   gap: 12px;
   align-items: center;
   padding: 12px clamp(18px, 4vw, 56px);
@@ -91,6 +91,18 @@ svg {
   color: #ffffff;
   background: var(--green);
   border: 0;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.account-shortcut {
+  min-height: 40px;
+  padding: 9px 13px;
+  color: var(--purple);
+  background: var(--soft-pink);
+  border: 1px solid #ffd2eb;
   border-radius: 999px;
   font-weight: 900;
   cursor: pointer;
@@ -192,6 +204,11 @@ svg {
 .primary-button:hover,
 .primary-button:focus-visible {
   background: #761260;
+}
+
+.primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .secondary-button {
@@ -318,6 +335,7 @@ svg {
 .about-section,
 .contact-page,
 .cart-page,
+.account-page,
 .legal-page {
   margin: 0 auto;
   width: min(1160px, calc(100% - 36px));
@@ -390,9 +408,15 @@ svg {
 
 .filters input:focus,
 .filters select:focus,
+.checkout-form input:focus,
+.checkout-form select:focus,
+.checkout-form textarea:focus,
+.account-form input:focus,
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .social-button:focus-visible,
+.cart-shortcut:focus-visible,
+.account-shortcut:focus-visible,
 .link-button:focus-visible,
 .mini-product:focus-visible,
 .modal-close:focus-visible,
@@ -794,6 +818,90 @@ svg {
   font-weight: 800;
 }
 
+.account-heading {
+  margin-bottom: 22px;
+}
+
+.account-heading h2 {
+  margin: 0;
+  color: var(--purple);
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.account-heading p:last-child {
+  max-width: 720px;
+  margin: 12px 0 0;
+  color: var(--slate);
+  line-height: 1.55;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.36fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.account-form,
+.account-info {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(91, 35, 98, 0.08);
+}
+
+.account-form {
+  display: grid;
+  gap: 12px;
+}
+
+.account-form h3 {
+  margin: 0;
+  color: var(--purple);
+}
+
+.account-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--slate);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.account-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-info {
+  display: grid;
+  gap: 10px;
+  border-top: 6px solid var(--teal);
+}
+
+.account-info strong {
+  color: var(--purple);
+}
+
+.account-info p {
+  margin: 0 0 8px;
+  color: var(--slate);
+  line-height: 1.55;
+}
+
 .legal-page {
   display: grid;
   gap: 22px;
@@ -988,7 +1096,7 @@ svg {
 
 @media (max-width: 980px) {
   .site-header {
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
   }
 
   .site-header nav {
@@ -1007,6 +1115,7 @@ svg {
   .about-section,
   .contact-page,
   .cart-layout,
+  .account-layout,
   .legal-list {
     grid-template-columns: 1fr;
   }
@@ -1053,7 +1162,8 @@ svg {
     display: none;
   }
 
-  .cart-shortcut {
+  .cart-shortcut,
+  .account-shortcut {
     grid-column: 1 / -1;
     width: 100%;
   }
@@ -1102,6 +1212,7 @@ svg {
   .about-section,
   .contact-page,
   .cart-page,
+  .account-page,
   .legal-page {
     width: min(100% - 28px, 1160px);
   }
@@ -1155,6 +1266,10 @@ svg {
 
   .checkout-row {
     grid-template-columns: 1fr;
+  }
+
+  .account-actions {
+    display: grid;
   }
 
   .cart-item {

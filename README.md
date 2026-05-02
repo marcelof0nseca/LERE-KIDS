@@ -31,12 +31,23 @@ npm run build
 ## Funcionalidades
 
 - Catalogo de brinquedos com busca e filtros
-- Carrinho local sem login
+- Carrinho local
+- Cadastro local do cliente com dados salvos no navegador
 - Checkout simples com nome, telefone, e-mail, CPF, endereco, CEP, tipo de entrega e observacoes
 - Calculo de subtotal e total quando os produtos possuem preco cadastrado
 - Suporte a produtos com valor `Consultar`, mantendo confirmacao pelo atendimento
 - Pedido finalizado pelo WhatsApp da loja
 - Links para Instagram, contato, politica de privacidade e politica de troca
+
+## Backend Futuro
+
+Nesta fase, os dados da conta ficam apenas no navegador do cliente. Para virar ecommerce completo, o frontend continua na Vercel e o backend pode ser criado com:
+
+- Vercel Functions em `/api` para pedidos, checkout, pagamentos e webhooks
+- Supabase Auth para login real com e-mail e senha
+- Supabase Postgres para clientes, enderecos, produtos, pedidos e status
+- Variaveis de ambiente na Vercel para tokens secretos
+- Mercado Pago Checkout Pro integrado somente pelo backend
 
 ## Publicacao
 
